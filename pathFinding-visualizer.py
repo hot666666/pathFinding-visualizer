@@ -1,6 +1,7 @@
 import pygame, sys
 import time
 from collections import deque
+import queue
 
 SCREEN = (600,800)
 BLACK = (0,0,0)
@@ -11,9 +12,9 @@ END_COLOR = (255,0,0)
 START_COLOR = (28,170,156)
 SPEED = 0.05
 
+
 def initBoard():
     return [[0 for _x in range(20)] for _y in range(20)]
-
 def drawLines():
     global screen
 
@@ -26,18 +27,15 @@ def drawBlock(pos_X0Y1, type):
     color_type = type
     pygame.draw.rect(screen, color_type, pygame.Rect((pos_X0Y1[0]*30+2,pos_X0Y1[1]*30+2),(28,28)))
 
-
 def checkBlock(pos_X0Y1):
     if Board[pos_X0Y1[1]][pos_X0Y1[0]] != 0: return True
     else: return False
-
 Points = []
 def checkPoints():
     if len(Points): return True
     else: return False
 def setBlock(pos_X0Y1, val):
     Board[pos_X0Y1[1]][pos_X0Y1[0]] = val
-
 
 def validPosOnBoard(pos):
     if pos[0] < 20 and pos[1] < 20: return True
@@ -46,7 +44,6 @@ def validSearchPos(pos, arr):
     if (-1 < y and y < len(arr)) and (-1 < x and x < len(arr)):
          if arr[y][x] != 1: return True
     else: return False
-
 
 def bfsSearch(points, arr):
     q = deque()
@@ -100,6 +97,121 @@ def bfsSearch(points, arr):
                     q.append(pos)
                     visited.append(pos)
 
+def dfsSearch(points, arr):
+    q = deque()
+    start, end = points
+
+
+    movements = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    q.append(start)
+    visited = [start]
+
+    current_pos = q.popleft()
+    poss = []
+    x, y = current_pos[0], current_pos[1]
+    for move in movements:
+        poss.append((x + move[0], y + move[1]))
+
+    for pos in poss:
+        if validSearchPos(pos, arr) and (pos not in visited):
+            q.append(pos)
+            visited.append(pos)
+
+    drawBlock(start, GREEN)
+    pygame.display.update()
+    time.sleep(0.1)
+    drawBlock(current_pos, START_COLOR)
+    pygame.display.update()
+
+
+    while q:
+
+        current_pos = q.popleft()
+        drawBlock(current_pos, YELLOW)
+        time.sleep(SPEED)
+        pygame.display.update()
+
+        if current_pos == end:
+            drawBlock(end, GREEN)
+            pygame.display.update()
+            time.sleep(0.1)
+            drawBlock(end, END_COLOR)
+            pygame.display.update()
+            break
+        else:
+            poss = []
+            x , y = current_pos[0] , current_pos[1]
+            for move in movements:
+                poss.append((x + move[0], y + move[1]))
+
+            for pos in poss:
+                if validSearchPos(pos,arr) and (pos not in visited):
+                    q.appendleft(pos)
+                    visited.append(pos)
+
+def astarSearch(points, arr):
+
+    q = queue.PriorityQueue()
+    start, end = points
+    depth = 0
+
+    def h(pos): return abs(pos[0] - end[0]) + abs(pos[1] - end[1])
+    def g(): return depth
+    def f(pos): return h(pos) + g()
+
+    class ListNode:
+        def __init__(self, pos, depth=0):
+            self.pos = pos
+            self.next = []
+            self.depth = depth
+            self.val = f(self.pos)
+        def __lt__(self,other):
+            return self.val < other.val
+
+
+    movements = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    q.put(ListNode(start))
+    visited = [start]
+
+    current_node = q.get()
+    depth = current_node.depth + 1
+    poss = []
+    x, y = current_node.pos
+    for move in movements:
+        poss.append((x + move[0], y + move[1]))
+
+    for pos in poss:
+        if validSearchPos(pos, arr) and (pos not in visited):
+            q.put(ListNode(pos, depth))
+
+
+    while not q.empty():
+        current_node = q.get()
+        drawBlock(current_node.pos, YELLOW)
+        time.sleep(SPEED)
+        pygame.display.update()
+
+        if current_node.pos == end:
+            drawBlock(end, GREEN)
+            pygame.display.update()
+            time.sleep(0.1)
+            drawBlock(end, END_COLOR)
+            pygame.display.update()
+            break
+
+        depth = current_node.depth + 1
+        poss = []
+        x, y = current_node.pos
+        for move in movements:
+            poss.append((x + move[0], y + move[1]))
+
+        for pos in poss:
+            if validSearchPos(pos, arr) and (pos not in visited):
+                q.put(ListNode(pos,depth))
+
+        visited.append(current_node.pos)
+
 
 
 
@@ -145,7 +257,12 @@ def runPygame():
                         if pos in Points:
                             drawBlock(pos, WHITE)
                             setBlock(pos, 0)
-                            Points.pop(-1)
+                            for idx,point in enumerate(Points):
+                                if point == pos and idx == 0:
+                                    drawBlock(Points[1], START_COLOR)
+                                    Points.pop(0)
+                                else:
+                                    Points.pop(1)
 
                 else: pass
 
@@ -183,7 +300,9 @@ def runPygame():
 
         pygame.display.update()
 
-    bfsSearch(Points,Board)
+    #bfsSearch(Points,Board)
+    #dfsSearch(Points,Board)
+    astarSearch(Points,Board)
 
     while True:
         for event in pygame.event.get():
