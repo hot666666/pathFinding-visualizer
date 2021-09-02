@@ -3,7 +3,6 @@ import time
 from collections import deque
 import queue
 
-
 SCREEN = (600,800)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -78,16 +77,17 @@ def validSearchPos(pos, arr):
          if arr[y][x] != 1: return True
     else: return False
 
-'''def dfsSearch(points, arr):
-    q = deque()
+
+def dfsSearch(points, arr):
+    stack = []
     start, end = points
 
 
-    movements = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    q.append(start)
+    movements = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    stack.append(start)
     visited = [start]
 
-    current_pos = q.popleft()
+    current_pos = stack.pop()
     poss = []
     x, y = current_pos[0], current_pos[1]
     for move in movements:
@@ -95,7 +95,7 @@ def validSearchPos(pos, arr):
 
     for pos in poss:
         if validSearchPos(pos, arr) and (pos not in visited):
-            q.appendleft(pos)
+            stack.append(pos)
             visited.append(pos)
 
     drawBlock(start, GREEN)
@@ -105,9 +105,9 @@ def validSearchPos(pos, arr):
     pygame.display.update()
 
 
-    while q:
+    while stack:
 
-        current_pos = q.popleft()
+        current_pos = stack.pop()
         drawBlock(current_pos, YELLOW)
         time.sleep(SPEED)
         pygame.display.update()
@@ -121,21 +121,20 @@ def validSearchPos(pos, arr):
             break
         else:
             poss = []
-            temp = []
             x , y = current_pos[0] , current_pos[1]
             for move in movements:
                 poss.append((x + move[0], y + move[1]))
 
             for pos in poss:
                 if validSearchPos(pos,arr) and (pos not in visited):
-                    q.appendleft(pos)
-                    visited.append(pos)'''
+                    stack.append(pos)
+                    visited.append(pos)
+
 def bfsSearch(points, arr):
     q = deque()
     start, end = points
 
-
-    movements = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    movements = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     q.append(start)
     visited = [start]
 
@@ -202,7 +201,7 @@ def astarSearch(points, arr):
             return self.val < other.val
 
 
-    movements = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    movements = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
     q.put(ListNode(start))
     visited = [start]
@@ -246,7 +245,7 @@ def astarSearch(points, arr):
         visited.append(current_node.pos)
 
 def printDiscriptions():
-    dispMessage('1. PRESS "A" or "B"', (443, 705), 15)
+    dispMessage('1. PRESS "A" or "B" or "D"', (467, 705), 15)
     dispMessage('2. RIGHT CLICK : SET POINTS', (480, 725), 15)
     dispMessage('3. SPACE : SEARCH', (443, 745), 15)
     dispMessage('4. SHIFT : CLEAN PATH', (456, 765), 15)
@@ -293,6 +292,10 @@ def runPygame():
                     if event.key == pygame.K_b:
                         drawMsgBlock(141,685)
                         SearchType = 'BFS'
+                        dispMessage(f'{SearchType}',(159,700))
+                    if event.key == pygame.K_d:
+                        drawMsgBlock(141,685)
+                        SearchType = 'DFS'
                         dispMessage(f'{SearchType}',(159,700))
                     if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                         initSearch(Board)
@@ -377,6 +380,8 @@ def runPygame():
             astarSearch(Points,Board)
         elif SearchType == 'BFS':
             bfsSearch(Points, Board)
+        elif SearchType == 'DFS':
+            dfsSearch(Points, Board)
         else:
             pass
 
