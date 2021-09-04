@@ -3,6 +3,7 @@ import time
 from collections import deque
 import queue
 
+
 SCREEN = (600,800)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -13,16 +14,16 @@ START_COLOR = (28,170,156)
 SPEED = 0.02
 
 
-
-
 def initBoard():
     return [[0 for _x in range(20)] for _y in range(20)]
+
 def drawLines():
     global screen
 
     for i in range(0,600+1,30):
         pygame.draw.line(screen, BLACK, (i, 0), (i, 600), 2)
         pygame.draw.line(screen, BLACK, (0, i), (600, i), 2)
+
 def dispMessage(text, XY,size=20,color=BLACK):
     global screen
 
@@ -32,11 +33,13 @@ def dispMessage(text, XY,size=20,color=BLACK):
     textpos.center = XY
     screen.blit(text, textpos)
     pygame.display.update()
+
 def drawBlock(pos_X0Y1, type):
     global screen
 
     color_type = type
     pygame.draw.rect(screen, color_type, pygame.Rect((pos_X0Y1[0]*30+2,pos_X0Y1[1]*30+2),(28,28)))
+
 def drawMsgBlock(X,Y):
     global screen
 
@@ -61,27 +64,36 @@ def initSearch(arr):
     pygame.display.update()
 
 def checkBlock(pos_X0Y1):
-    if Board[pos_X0Y1[1]][pos_X0Y1[0]] != 0: return True
-    else: return False
+    if Board[pos_X0Y1[1]][pos_X0Y1[0]] != 0:
+        return True
+    else:
+        return False
+
 def checkPoints():
-    if len(Points): return True
-    else: return False
+    if len(Points):
+        return True
+    else:
+        return False
+
 def setBlock(pos_X0Y1, val):
     Board[pos_X0Y1[1]][pos_X0Y1[0]] = val
 
 def validPosOnBoard(pos):
-    if pos[0] < 20 and pos[1] < 20: return True
+    if pos[0] < 20 and pos[1] < 20:
+        return True
+
 def validSearchPos(pos, arr):
     x, y = pos[0], pos[1]
     if (-1 < y and y < len(arr)) and (-1 < x and x < len(arr)):
-         if arr[y][x] != 1: return True
-    else: return False
+         if arr[y][x] != 1:
+             return True
+    else:
+        return False
 
 
 def dfsSearch(points, arr):
     stack = []
     start, end = points
-
 
     movements = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     stack.append(start)
@@ -130,6 +142,7 @@ def dfsSearch(points, arr):
                     stack.append(pos)
                     visited.append(pos)
 
+
 def bfsSearch(points, arr):
     q = deque()
     start, end = points
@@ -157,7 +170,6 @@ def bfsSearch(points, arr):
 
 
     while q:
-
         current_pos = q.popleft()
         drawBlock(current_pos, YELLOW)
         time.sleep(SPEED)
@@ -181,15 +193,18 @@ def bfsSearch(points, arr):
                     q.append(pos)
                     visited.append(pos)
 
-def astarSearch(points, arr):
 
+def astarSearch(points, arr):
     q = queue.PriorityQueue()
     start, end = points
     depth = 0
 
-    def h(pos): return (pos[0] - end[0])**2 + (pos[1] - end[1])**2
-    def g(): return depth
-    def f(pos): return h(pos) + g()
+    def h(pos):
+        return (pos[0] - end[0])**2 + (pos[1] - end[1])**2
+    def g():
+        return depth
+    def f(pos):
+        return h(pos) + g()
 
     class ListNode:
         def __init__(self, pos, depth=0):
@@ -244,6 +259,7 @@ def astarSearch(points, arr):
 
         visited.append(current_node.pos)
 
+
 def printDiscriptions():
     dispMessage('1. PRESS "A" or "B" or "D"', (467, 705), 15)
     dispMessage('2. RIGHT CLICK : SET POINTS', (480, 725), 15)
@@ -253,6 +269,7 @@ def printDiscriptions():
     drawMsgBlock(20, 635)
     drawMsgBlock(80, 635)
     drawMsgBlock(140, 635)
+
 def runPygame():
     global screen
     global Points
@@ -376,6 +393,8 @@ def runPygame():
         printDiscriptions()
         dispMessage('SEARCHING', (121,650),30)
 
+
+        initSearch(Board)
         if SearchType == 'A-star':
             astarSearch(Points,Board)
         elif SearchType == 'BFS':
@@ -392,7 +411,6 @@ def runPygame():
         printDiscriptions()
         dispMessage('SearchType : ', (80, 700))
         dispMessage(f'{SearchType}', (170, 700))
-
 
 
 def initPygame():
