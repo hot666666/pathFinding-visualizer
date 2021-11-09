@@ -1,5 +1,5 @@
-# pathFinding-visualizer
-pathFinding-visualizer
+PathFinding Visualizer
+=====
 
 left mouse click / moving with left mouse cliked : making block
 
